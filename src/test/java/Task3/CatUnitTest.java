@@ -10,7 +10,9 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class CatUnitTest {
 
@@ -19,10 +21,10 @@ public class CatUnitTest {
     static final String CAT_MRUCZEK = "Mruczek";
     static final String CAT_LUNA = "Luna";
     static final String CAT_OTHER_CAT = "OtherCat";
-    static final String CAT_ANOTHER_CAT = "AnotherCat";
 
     static final Cat CAT_BARON_4 = new Cat(4, CAT_BARON);
     static final Cat CAT_BARON_5 = new Cat(5, CAT_BARON);
+    static final Cat CAT_BARON_18 = new Cat(18, CAT_BARON);
     static final Cat CAT_BONIFACY_2 = new Cat(2, CAT_BONIFACY);
     static final Cat CAT_MRUCZEK_9 = new Cat(9, CAT_MRUCZEK);
     static final Cat CAT_LUNA_5 = new Cat(5, CAT_LUNA);
@@ -109,7 +111,7 @@ public class CatUnitTest {
 
         @Test
         @DisplayName("should correctly handle sorting a list of Cats")
-        void whenSortingOriginalList() {
+        void whenSortingOriginalList_checkWithArrays() {
             //given
             Integer[] expectedLives = new Integer[] {Integer.MAX_VALUE, 9, 5, 5, 4, 2};
             String[] expectedNames = new String[] {CAT_BONIFACY, CAT_MRUCZEK, CAT_LUNA, CAT_BARON, CAT_BARON, CAT_BONIFACY};
@@ -122,6 +124,23 @@ public class CatUnitTest {
             //then
             assertTrue(Arrays.equals(expectedLives, actualLives));
             assertTrue(Arrays.equals(expectedNames, actualNames));
+        }
+
+        @Test
+        @DisplayName("should correctly handle sorting a list of Cats")
+        void whenSortingOriginalList_checkWithLists() {
+            //given
+            List<Integer> expectedLives = List.of(Integer.MAX_VALUE, 9, 5, 5, 4, 2);
+            List<String> expectedNames = List.of(CAT_BONIFACY, CAT_MRUCZEK, CAT_LUNA, CAT_BARON, CAT_BARON, CAT_BONIFACY);
+
+            //when
+            Collections.sort(cats, catComparator);
+            List<Integer> actualLives = cats.stream().map(cat -> cat.getLives()).collect(Collectors.toList());
+            List<String> actualNames = cats.stream().map(cat -> cat.getName()).collect(Collectors.toList());
+
+            //then
+            assertEquals(expectedLives, actualLives);
+            assertEquals(expectedNames, actualNames);
         }
     }
 
@@ -141,6 +160,7 @@ public class CatUnitTest {
             cats.add(CAT_BONIFACY_2);
             cats.add(CAT_LUNA_5);
             cats.add(CAT_BARON_5);
+            cats.add(CAT_BARON_18);
         }
 
         @Nested
@@ -148,7 +168,7 @@ public class CatUnitTest {
         class HappyCases {
 
             @Test
-            @DisplayName("contain 3 cat objects after filtering by name OR lives Predicate")
+            @DisplayName("contain 4 Cat objects after filtering by name OR lives Predicate")
             void whenFilteringByNameOrLivesPredicate() {
                 //when
                 List<Cat> filteredCats = cats.stream()
@@ -156,16 +176,13 @@ public class CatUnitTest {
                         .collect(Collectors.toList());
 
                 //then
-                assertEquals(3, filteredCats.size());
-                assertAll( () -> assertTrue(filteredCats.contains(CAT_LUNA_5)),
-                           () -> assertTrue(filteredCats.contains(CAT_BARON_5)),
-                           () -> assertTrue(filteredCats.contains(CAT_BARON_4)),
-                           () -> assertFalse(filteredCats.contains(CAT_MRUCZEK_9)),
-                           () -> assertFalse(filteredCats.contains(CAT_BONIFACY_2)));
+                assertThat(filteredCats).hasSize(4)
+                                        .extracting(Cat::getName)
+                                            .doesNotContain(CAT_BONIFACY, CAT_MRUCZEK);
             }
 
             @Test
-            @DisplayName("contain 2 cat objects after filtering by name AND lives Predicate")
+            @DisplayName("contain 2 Cat objects after filtering by name AND lives Predicate")
             void whenFilteringByNameAndLivesPredicate() {
                 //when
                 List<Cat> filteredCats = cats.stream()
@@ -173,21 +190,14 @@ public class CatUnitTest {
                         .collect(Collectors.toList());
 
                 //then
-                assertEquals(2, filteredCats.size());
-                assertAll( () -> assertTrue(filteredCats.contains(CAT_BARON_4)),
-                           () -> assertTrue(filteredCats.contains(CAT_BARON_5)),
-                           () -> assertFalse(filteredCats.contains(CAT_MRUCZEK_9)),
-                           () -> assertFalse(filteredCats.contains(CAT_BONIFACY_2)),
-                           () -> assertFalse(filteredCats.contains(CAT_LUNA_5)));
+                assertThat(filteredCats).hasSize(2)
+                                        .extracting("lives", "name")
+                                        .contains(tuple(CAT_BARON_4.getLives(), CAT_BARON),
+                                                  tuple(CAT_BARON_5.getLives(), CAT_BARON));
             }
-        }
-
-        @Nested
-        @DisplayName("should not")
-        class AlternativeCases {
 
             @Test
-            @DisplayName("contain any cat objects after filtering by name AND negated lives Predicate")
+            @DisplayName("contain 1 Cat object after filtering by name AND negated lives Predicate")
             void whenFilteringByNameAndNegateLivesPredicate() {
                 //when
                 List<Cat> filteredCats = cats.stream()
@@ -195,7 +205,9 @@ public class CatUnitTest {
                         .collect(Collectors.toList());
 
                 //then
-                assertEquals(0, filteredCats.size());
+                assertThat(filteredCats).hasSize(1)
+                                        .extracting("lives", "name")
+                                        .contains(tuple(CAT_BARON_18.getLives(), CAT_BARON));
             }
         }
     }
