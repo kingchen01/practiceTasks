@@ -6,22 +6,21 @@ import java.util.stream.Collectors;
 
 public class HealthyString implements HealthyCheck<String> {
 
-    private final String threshold;
     private final List<String> objects;
 
-    public HealthyString(String threshold, List<String> objects) {
-        this.threshold = threshold;
+    public HealthyString(List<String> objects) {
         this.objects = objects;
     }
 
     @Override
-    public List<String> getOnlyHealthy() {
-        Predicate<String> predicate = s -> s.length() < this.threshold.length();
-        return this.objects.stream().filter(predicate).collect(Collectors.toList());
-    }
-
-    public String getThreshold() {
-        return threshold;
+    public List<String> getOnlyHealthy(String threshold) {
+        if (threshold != null) {
+            Predicate<String> predicate = s -> s.length() < threshold.length();
+            return this.objects.stream().filter(predicate).collect(Collectors.toList());
+        }
+        else {
+            return  objects;
+        }
     }
 
     public List<String> getObjects() {
