@@ -5,16 +5,27 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.List;
+import java.util.stream.Stream;
+
+import static org.assertj.core.api.Assertions.*;
 
 public class HealthyCheckImplUnitTest {
 
+    private static Stream<Arguments> provideParametersHealthyInteger() {
+        return Stream.of(
+                Arguments.of(-4, 2, List.of(23, 1000)),
+                Arguments.of(2, 4, List.of(23, 5, 16, 1000)),
+                Arguments.of(0, 5, List.of(23, 4, 5, 16, 1000))
+        );
+    }
+
     @Nested
-    @DisplayName("test HealthyString class implementation")
+    @DisplayName("HealthyString class implementation")
     class HealthyStringCases {
         private List<String> objects;
         private HealthyString healthyString;
@@ -39,12 +50,12 @@ public class HealthyCheckImplUnitTest {
         @ParameterizedTest
         @DisplayName("should correctly handle returning only healthy objects from a given list")
         @CsvSource({", 6", "'',0", THRESHOLD_LONG + ",6", THRESHOLD + ",4", THRESHOLD_SHORT + ",0"})
-        void shouldReturnHealthyObjects(String threshold, String size) {
+        void shouldReturnHealthyObjects(String threshold, int size) {
             //when
             List<String> onlyHealthy = healthyString.getOnlyHealthy(threshold);
 
             //then
-            assertThat(onlyHealthy).hasSize(Integer.parseInt(size));
+            assertThat(onlyHealthy).hasSize(size);
         }
 
         @Test
@@ -61,8 +72,37 @@ public class HealthyCheckImplUnitTest {
     }
 
     @Nested
-    @DisplayName("test HealthyInteger class implementation")
-    class HealthyInteger {
+    @DisplayName("HealthyInteger class implementation")
+    class HealthyIntegerCases {
 
+        private List<Integer> objects;
+        private HealthyInteger healthyInteger;
+
+        @BeforeEach
+        void prepare() {
+            objects = List.of(23, -15, 0, 4, 5, 16, 1000);
+            healthyInteger = new HealthyInteger(objects);
+        }
+
+        @ParameterizedTest
+        @DisplayName("should correctly handle returning only healthy objects from a given list")
+        @MethodSource("Task4.HealthyCheckImplUnitTest#provideParametersHealthyInteger")
+        void shouldReturnHealthyObjects(Integer threshold, int size, List<Integer> expectedHealthy) {
+            //when
+            List<Integer> actualHealthy = healthyInteger.getOnlyHealthy(threshold);
+
+            //then
+            assertThat(actualHealthy).hasSize(size)
+                                     .isEqualTo(expectedHealthy);
+        }
+
+        @Test
+        @DisplayName("should throw IllegalArgumentException when given threshold was null")
+        void shouldThrowException_whenNullThreshold() {
+            //when then
+            assertThatIllegalArgumentException().isThrownBy(() -> healthyInteger.getOnlyHealthy(null))
+                                                .withMessage(HealthyInteger.ILLEGAL_ARGUMENT)
+                                                .withNoCause();
+        }
     }
 }
