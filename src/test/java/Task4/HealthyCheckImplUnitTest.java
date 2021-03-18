@@ -48,7 +48,7 @@ public class HealthyCheckImplUnitTest {
         }
 
         @ParameterizedTest
-        @DisplayName("should correctly handle returning only healthy objects from a given list")
+        @DisplayName("should correctly handle returning only healthy objects when following parameters are given:")
         @CsvSource({", 6", "'',0", THRESHOLD_LONG + ",6", THRESHOLD + ",4", THRESHOLD_SHORT + ",0"})
         void shouldReturnHealthyObjects(String threshold, int size) {
             //when
@@ -85,7 +85,7 @@ public class HealthyCheckImplUnitTest {
         }
 
         @ParameterizedTest
-        @DisplayName("should correctly handle returning only healthy objects from a given list")
+        @DisplayName("should correctly handle returning only healthy objects when following parameters are given:")
         @MethodSource("Task4.HealthyCheckImplUnitTest#provideParametersHealthyInteger")
         void shouldReturnHealthyObjects(Integer threshold, int size, List<Integer> expectedHealthy) {
             //when
