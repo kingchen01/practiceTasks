@@ -1,11 +1,11 @@
 package Task5;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 /*
@@ -24,7 +24,8 @@ Design and test a class that has one method: getRestResponse() which uses method
  */
 public class RestResponse {
 
-    private CustomRest customRest;
+    private final CustomRest customRest;
+    private static final Logger LOGGER = Logger.getLogger( RestResponse.class.getName() );
 
     public RestResponse(CustomRest customRest) {
         this.customRest = customRest;
@@ -43,7 +44,7 @@ public class RestResponse {
 
         else {
             List<Integer> values = customResponse.getValues();
-            Consumer<Integer> loggerConsumer = v -> System.out.println(String.format("Received value %s at " +
+            Consumer<Integer> loggerConsumer = v -> LOGGER.log(Level.INFO, String.format("Received value %s at " +
                     "position %s %n", v, values.indexOf(v)));
 
             values.forEach(loggerConsumer);
@@ -53,7 +54,7 @@ public class RestResponse {
                                                                               .mapToInt(Integer::intValue)
                                                                               .sum();
                 Integer sum = valuesFunction.apply(values);
-                return Arrays.asList(sum);
+                return Collections.singletonList(sum);
             }
 
             else {

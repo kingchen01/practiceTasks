@@ -18,7 +18,7 @@ import static org.mockito.Mockito.when;
 import static org.assertj.core.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class RestResponseTest {
+class RestResponseTest {
 
     @Mock
     CustomRest customRest;
@@ -59,7 +59,7 @@ public class RestResponseTest {
 
         //then
         assertThat(values).isNotNull()
-                          .hasSize(0);
+                          .isEmpty();
     }
 
     @ParameterizedTest
