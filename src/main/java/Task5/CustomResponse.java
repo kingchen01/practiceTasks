@@ -7,8 +7,9 @@ public class CustomResponse {
     private final int responseCode;
     private List<Integer> values;
 
-    public CustomResponse(int responseCode) {
+    public CustomResponse(int responseCode, List<Integer> values) {
         this.responseCode = responseCode;
+        this.values = values;
     }
 
     public int getResponseCode() {
@@ -19,7 +20,4 @@ public class CustomResponse {
         return values;
     }
 
-    public void setValues(List<Integer> values) {
-        this.values = values;
-    }
 }
