@@ -4,7 +4,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -25,7 +24,7 @@ Design and test a class that has one method: getRestResponse() which uses method
 public class RestResponse {
 
     private final CustomRest customRest;
-    private static final Logger LOGGER = Logger.getLogger( RestResponse.class.getName() );
+    private static final Logger LOGGER = Logger.getLogger(RestResponse.class.getName());
 
     public RestResponse(CustomRest customRest) {
         this.customRest = customRest;
@@ -44,25 +43,33 @@ public class RestResponse {
 
         else {
             List<Integer> values = customResponse.getValues();
-            Consumer<Integer> loggerConsumer = v -> LOGGER.log(Level.INFO, String.format("Received value %s at " +
-                    "position %s %n", v, values.indexOf(v)));
-
-            values.forEach(loggerConsumer);
+            values.forEach(log(values));
 
             if (values.size() > 5) {
-                Function<List<Integer>, Integer> valuesFunction = list -> list.stream()
-                                                                              .mapToInt(Integer::intValue)
-                                                                              .sum();
-                Integer sum = valuesFunction.apply(values);
+                Integer sum = sumValues().apply(values);
                 return Collections.singletonList(sum);
             }
 
             else {
-                Function<List<Integer>, List<Integer>> valuesFunction = list -> list.stream()
-                                                                                    .map(e -> e * 100)
-                                                                                    .collect(Collectors.toList());
-                return valuesFunction.apply(values);
+                return multipleElements(100).apply(values);
             }
         }
+    }
+
+    private Consumer<Integer> log(List<Integer> values) {
+        return v -> LOGGER.info(String.format("Received value %s at " +
+                "position %s", v, values.indexOf(v)));
+    }
+
+    private Function<List<Integer>, Integer> sumValues() {
+        return list -> list.stream()
+                            .mapToInt(Integer::intValue)
+                            .sum();
+    }
+
+    private Function<List<Integer>, List<Integer>> multipleElements (int multiplier) {
+        return list -> list.stream()
+                            .map(e -> e * multiplier)
+                            .collect(Collectors.toList());
     }
 }
