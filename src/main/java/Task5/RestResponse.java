@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -41,18 +42,25 @@ public class RestResponse {
         }
 
         else {
+            List<Integer> values = customResponse.getValues();
+            Consumer<Integer> loggerConsumer = v -> System.out.println(String.format("Received value %s at " +
+                    "position %s %n", v, values.indexOf(v)));
 
-            if (customResponse.getValues().size() > 5) {
-                Function<List<Integer>, Integer> valuesFunction = list -> list.stream().mapToInt(Integer::intValue).sum();
-                Integer sum = valuesFunction.apply(customResponse.getValues());
+            values.forEach(loggerConsumer);
 
+            if (values.size() > 5) {
+                Function<List<Integer>, Integer> valuesFunction = list -> list.stream()
+                                                                              .mapToInt(Integer::intValue)
+                                                                              .sum();
+                Integer sum = valuesFunction.apply(values);
                 return Arrays.asList(sum);
             }
 
             else {
-                Function<List<Integer>, List<Integer>> valuesFunction = list -> list.stream().map(e -> e * 100).collect(Collectors.toList());
-
-                return valuesFunction.apply(customResponse.getValues());
+                Function<List<Integer>, List<Integer>> valuesFunction = list -> list.stream()
+                                                                                    .map(e -> e * 100)
+                                                                                    .collect(Collectors.toList());
+                return valuesFunction.apply(values);
             }
         }
     }
